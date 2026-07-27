@@ -682,25 +682,45 @@ export default function Home() {
             
             <div className="space-y-4">
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-gray-500">Kart Üzerindeki İsim</label>
-                <input type="text" placeholder="Örn: Taliha Dönmez" className="w-full rounded-xl border border-gray-200 p-3 text-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100" />
+                <label className="mb-1.5 block text-xs font-bold text-gray-700">Kart Üzerindeki İsim</label>
+                <input type="text" placeholder="Örn: Taliha Dönmez" className="w-full rounded-xl border border-gray-300 p-3 text-sm text-gray-900 placeholder-gray-500 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200" />
               </div>
               
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-gray-500">Kart Numarası</label>
-                <input type="text" placeholder="0000 0000 0000 0000" maxLength={19} className="w-full rounded-xl border border-gray-200 p-3 text-sm tracking-widest focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100" />
+                <label className="mb-1.5 block text-xs font-bold text-gray-700">Kart Numarası</label>
+                <input type="text" placeholder="0000 0000 0000 0000" maxLength={19} className="w-full rounded-xl border border-gray-300 p-3 text-sm font-medium tracking-widest text-gray-900 placeholder-gray-500 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200" />
               </div>
               
               <div className="flex gap-4">
                 <div className="flex-1">
-                  <label className="mb-1.5 block text-xs font-medium text-gray-500">Son Kullanma (AA/YY)</label>
-                  <input type="text" placeholder="12/26" maxLength={5} className="w-full rounded-xl border border-gray-200 p-3 text-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100" />
+                  <label className="mb-1.5 block text-xs font-bold text-gray-700">Son Kullanma (AA/YY)</label>
+                  <input type="text" placeholder="12/26" maxLength={5} className="w-full rounded-xl border border-gray-300 p-3 text-sm text-gray-900 placeholder-gray-500 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200" />
                 </div>
                 <div className="flex-1">
-                  <label className="mb-1.5 block text-xs font-medium text-gray-500">CVV</label>
-                  <input type="text" placeholder="***" maxLength={3} className="w-full rounded-xl border border-gray-200 p-3 text-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100" />
+                  <label className="mb-1.5 block text-xs font-bold text-gray-700">CVV</label>
+                  <input type="text" placeholder="***" maxLength={3} className="w-full rounded-xl border border-gray-300 p-3 text-sm text-gray-900 placeholder-gray-500 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200" />
                 </div>
               </div>
+
+              <div className="mt-6 pt-4 border-t border-gray-100">
+                <button 
+                  onClick={() => {
+                    alert("Harika! Rezervasyonunuz başarıyla tamamlandı. İyi kamplar!");
+                    setOdemeModalAcik(false);
+                    modalKapat();
+                  }}
+                  className="w-full rounded-xl bg-emerald-600 px-4 py-3.5 text-sm font-semibold text-white shadow-md transition hover:bg-emerald-500"
+                >
+                  {fiyatFormat(toplamTutar)} Öde ve Tamamla
+                </button>
+                <button 
+                  onClick={() => setOdemeModalAcik(false)}
+                  className="mt-3 w-full rounded-xl px-4 py-3 text-sm font-medium text-gray-500 transition hover:bg-gray-50 hover:text-gray-700"
+                >
+                  Vazgeç
+                </button>
+              </div>
+            </div>
 
               <div className="mt-6 pt-4 border-t border-gray-100">
                 <button 
