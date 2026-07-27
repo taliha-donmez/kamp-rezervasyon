@@ -22,7 +22,7 @@ type KendiCadirSecimi = "yok" | "standart" | "buyuk";
 const kampAlanlari: KampAlani[] = [
   {
     id: 1,
-    ad: "Sahil Çadır Alanı",
+    ad: "Çadır Alanı",
     tur: "Çadır",
     kapasite: "4 Kişi",
     gecelikFiyat: "865 ₺",
@@ -169,6 +169,7 @@ function hesaplaToplam(
 
 export default function Home() {
   const [modalAcik, setModalAcik] = useState(false);
+  const [odemeModalAcik, setOdemeModalAcik] = useState(false);
   const [seciliKamp, setSeciliKamp] = useState<KampAlani | null>(null);
   const [seciliParsel, setSeciliParsel] = useState<SeciliParsel | null>(null);
   const [sungerYatak, setSungerYatak] = useState(false);
@@ -251,7 +252,7 @@ export default function Home() {
             Doğayla iç içe konaklama
           </p>
           <h1 className="max-w-2xl text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
-            Kamp Rezervasyon
+          Dikilitaş Kamp Alanı Rezervasyon
           </h1>
           <p className="mt-4 max-w-xl text-lg leading-relaxed text-gray-600">
             Çadır ve karavan alanlarımızı keşfedin, detayları inceleyin ve
@@ -664,10 +665,61 @@ export default function Home() {
               <button
                 type="button"
                 disabled={!odemeHazir}
+                onClick={() => setOdemeModalAcik(true)}
                 className="w-full rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-3.5 text-sm font-semibold text-white shadow-md transition-all hover:from-emerald-500 hover:to-teal-500 active:scale-[0.98] disabled:cursor-not-allowed disabled:from-gray-300 disabled:to-gray-400 disabled:shadow-none"
               >
                 Ödemeye Geç
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Ödeme Modal */}
+      {odemeModalAcik && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm">
+          <div className="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+            <h3 className="mb-4 text-xl font-bold text-gray-900">Ödeme Bilgileri</h3>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="mb-1.5 block text-xs font-medium text-gray-500">Kart Üzerindeki İsim</label>
+                <input type="text" placeholder="Örn: Taliha Dönmez" className="w-full rounded-xl border border-gray-200 p-3 text-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100" />
+              </div>
+              
+              <div>
+                <label className="mb-1.5 block text-xs font-medium text-gray-500">Kart Numarası</label>
+                <input type="text" placeholder="0000 0000 0000 0000" maxLength={19} className="w-full rounded-xl border border-gray-200 p-3 text-sm tracking-widest focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100" />
+              </div>
+              
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <label className="mb-1.5 block text-xs font-medium text-gray-500">Son Kullanma (AA/YY)</label>
+                  <input type="text" placeholder="12/26" maxLength={5} className="w-full rounded-xl border border-gray-200 p-3 text-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100" />
+                </div>
+                <div className="flex-1">
+                  <label className="mb-1.5 block text-xs font-medium text-gray-500">CVV</label>
+                  <input type="text" placeholder="***" maxLength={3} className="w-full rounded-xl border border-gray-200 p-3 text-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100" />
+                </div>
+              </div>
+
+              <div className="mt-6 pt-4 border-t border-gray-100">
+                <button 
+                  onClick={() => {
+                    alert("Harika! Rezervasyonunuz başarıyla tamamlandı. İyi kamplar!");
+                    setOdemeModalAcik(false);
+                    modalKapat();
+                  }}
+                  className="w-full rounded-xl bg-emerald-600 px-4 py-3.5 text-sm font-semibold text-white shadow-md transition hover:bg-emerald-500"
+                >
+                  {fiyatFormat(toplamTutar)} Öde ve Tamamla
+                </button>
+                <button 
+                  onClick={() => setOdemeModalAcik(false)}
+                  className="mt-3 w-full rounded-xl px-4 py-3 text-sm font-medium text-gray-500 transition hover:bg-gray-50 hover:text-gray-700"
+                >
+                  Vazgeç
+                </button>
+              </div>
             </div>
           </div>
         </div>
