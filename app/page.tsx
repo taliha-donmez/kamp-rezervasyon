@@ -721,26 +721,6 @@ export default function Home() {
                 </button>
               </div>
             </div>
-
-              <div className="mt-6 pt-4 border-t border-gray-100">
-                <button 
-                  onClick={() => {
-                    alert("Harika! Rezervasyonunuz başarıyla tamamlandı. İyi kamplar!");
-                    setOdemeModalAcik(false);
-                    modalKapat();
-                  }}
-                  className="w-full rounded-xl bg-emerald-600 px-4 py-3.5 text-sm font-semibold text-white shadow-md transition hover:bg-emerald-500"
-                >
-                  {fiyatFormat(toplamTutar)} Öde ve Tamamla
-                </button>
-                <button 
-                  onClick={() => setOdemeModalAcik(false)}
-                  className="mt-3 w-full rounded-xl px-4 py-3 text-sm font-medium text-gray-500 transition hover:bg-gray-50 hover:text-gray-700"
-                >
-                  Vazgeç
-                </button>
-              </div>
-            </div>
           </div>
         </div>
       )}
