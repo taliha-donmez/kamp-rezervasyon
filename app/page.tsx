@@ -2,8 +2,8 @@
 
 import { useMemo, useState, useEffect } from "react";
 import { signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, User, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
-import { auth, db } from "../firebase";
 import { collection, addDoc } from "firebase/firestore";
+import { auth, db } from "../firebase";
 
 type KampAlani = {
   id: number;
@@ -174,7 +174,7 @@ export default function Home() {
   // --- KULLANICI GİRİŞ SİSTEMİ DURUMLARI ---
   const [email, setEmail] = useState("");
   const [sifre, setSifre] = useState("");
-  const [kayitMi, setKayitMi] = useState(false); // true ise Kayıt Ol, false ise Giriş Yap ekranı
+  const [kayitMi, setKayitMi] = useState(false); 
 
 // E-posta ile Kayıt/Giriş fonksiyonu
 const epostaIslemi = async (e: React.FormEvent) => {
@@ -184,12 +184,12 @@ const epostaIslemi = async (e: React.FormEvent) => {
     return;
   }
 
-  // Sadece "Kayıt Ol" aşamasında şifre kurallarını kontrol et
   if (kayitMi) {
-    const sifreKurallari = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,16}$/;
+    // Vercel'in kafasını karıştırmayacak, güvenli ve temiz Regex (Şifre kuralı)
+    const sifreKurallari = /^(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).{8,16}$/;
     if (!sifreKurallari.test(sifre)) {
       alert("Şifreniz 8-16 karakter uzunluğunda olmalı ve en az bir büyük harf, bir rakam ve bir özel karakter (noktalama işareti) içermelidir.");
-      return; // Kurallara uymazsa işlemi burada durdur
+      return; 
     }
   }
 
@@ -209,10 +209,10 @@ const epostaIslemi = async (e: React.FormEvent) => {
     else alert("Bir hata oluştu. Lütfen bilgilerinizi kontrol edin.");
   }
 };
+
   const [kullanici, setKullanici] = useState<User | null>(null);
   const [girisModalAcik, setGirisModalAcik] = useState(false);
 
-  // Kullanıcının giriş yapıp yapmadığını sürekli dinleyen sistem
   useEffect(() => {
     const abonelik = onAuthStateChanged(auth, (guncelKullanici) => {
       setKullanici(guncelKullanici);
@@ -220,7 +220,6 @@ const epostaIslemi = async (e: React.FormEvent) => {
     return () => abonelik();
   }, []);
 
-  // Google ile giriş fonksiyonu
   const googleIleGirisYap = async () => {
     const saglayici = new GoogleAuthProvider();
     try {
@@ -232,7 +231,6 @@ const epostaIslemi = async (e: React.FormEvent) => {
     }
   };
 
-  // Çıkış yapma fonksiyonu
   const cikisYap = async () => {
     try {
       await signOut(auth);
@@ -240,6 +238,7 @@ const epostaIslemi = async (e: React.FormEvent) => {
       console.error("Çıkış hatası:", hata);
     }
   };
+
   // ------------------------------------------
   const [modalAcik, setModalAcik] = useState(false);
   const [odemeModalAcik, setOdemeModalAcik] = useState(false);
@@ -252,8 +251,10 @@ const epostaIslemi = async (e: React.FormEvent) => {
   const [kendiCadir, setKendiCadir] = useState<KendiCadirSecimi>("yok");
   const [girisTarihi, setGirisTarihi] = useState("");
   const [cikisTarihi, setCikisTarihi] = useState("");
+  
   const bugunTarihi = new Date();
   const bugun = `${bugunTarihi.getFullYear()}-${String(bugunTarihi.getMonth() + 1).padStart(2, "0")}-${String(bugunTarihi.getDate()).padStart(2, "0")}`;
+  
   const geceSayisi = useMemo(
     () => hesaplaGeceSayisi(girisTarihi, cikisTarihi),
     [girisTarihi, cikisTarihi]
@@ -329,7 +330,7 @@ const epostaIslemi = async (e: React.FormEvent) => {
                   <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold">👤</div>
                 )}
                 <span className="text-sm font-semibold text-gray-800">
-                  {kullanici.displayName || "Kampçı"}
+                  {kullanici.displayName || kullanici.email || "Kampçı"}
                 </span>
               </div>
               <div className="h-4 w-px bg-gray-300"></div>
@@ -510,8 +511,7 @@ const epostaIslemi = async (e: React.FormEvent) => {
 
             <div className="flex-1 overflow-y-auto px-6 py-5">
               {/* Tarih Seçimi */}
-{/* Tarih Seçimi */}
-<div className="mb-6">
+              <div className="mb-6">
                 <p className="mb-3 text-sm font-medium text-gray-700">
                   Konaklama Tarihleri
                 </p>
@@ -553,6 +553,7 @@ const epostaIslemi = async (e: React.FormEvent) => {
                       : "Giriş ve çıkış tarihi seçin"}
                 </p>
               </div>
+
               {/* Kroki */}
               <div>
                 <p className="mb-3 text-sm font-medium text-gray-700">
@@ -776,6 +777,7 @@ const epostaIslemi = async (e: React.FormEvent) => {
           </div>
         </div>
       )}
+
       {/* Ödeme Modal */}
       {odemeModalAcik && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm">
@@ -804,14 +806,14 @@ const epostaIslemi = async (e: React.FormEvent) => {
                 </div>
               </div>
 
-              <button 
+              <div className="mt-6 pt-4 border-t border-gray-100">
+                <button 
                   onClick={async () => {
                     if (!kullanici) {
                       alert("Lütfen önce giriş yapın veya kayıt olun!");
                       return;
                     }
                     try {
-                      // Firebase 'rezervasyonlar' koleksiyonuna veriyi kaydediyoruz
                       await addDoc(collection(db, "rezervasyonlar"), {
                         kullaniciId: kullanici.uid,
                         kullaniciAdi: kullanici.displayName || kullanici.email,
@@ -846,8 +848,9 @@ const epostaIslemi = async (e: React.FormEvent) => {
           </div>
         </div>
       )}
-{/* Kullanıcı Giriş Modal'ı */}
-{girisModalAcik && (
+
+      {/* Kullanıcı Giriş Modal'ı */}
+      {girisModalAcik && (
         <div className="fixed inset-0 z-[80] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm">
           <div className="relative w-full max-w-sm rounded-3xl bg-white p-8 shadow-2xl text-center">
             <button
@@ -886,7 +889,7 @@ const epostaIslemi = async (e: React.FormEvent) => {
                   value={sifre}
                   onChange={(e) => setSifre(e.target.value)}
                   placeholder="••••••" 
-                  maxLength={16} 
+                  maxLength={16}
                   className="w-full rounded-xl border border-gray-300 p-3 text-sm text-gray-900 placeholder-gray-400 font-medium focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
                   required
                 />
