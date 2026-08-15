@@ -1,8 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
-import { signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, User } from "firebase/auth";
-import { auth } from "../firebase";
+import { signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, User, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 
 type KampAlani = {
   id: number;
@@ -171,6 +169,36 @@ function hesaplaToplam(
 
 export default function Home() {
   // --- KULLANICI GİRİŞ SİSTEMİ DURUMLARI ---
+  const [email, setEmail] = useState("");
+  const [sifre, setSifre] = useState("");
+  const [kayitMi, setKayitMi] = useState(false); // true ise Kayıt Ol, false ise Giriş Yap ekranı
+
+  // E-posta ile Kayıt/Giriş fonksiyonu
+  const epostaIslemi = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !sifre) {
+      alert("Lütfen e-posta ve şifrenizi girin.");
+      return;
+    }
+    try {
+      if (kayitMi) {
+        // Yeni kayıt oluştur
+        await createUserWithEmailAndPassword(auth, email, sifre);
+      } else {
+        // Var olan hesaba giriş yap
+        await signInWithEmailAndPassword(auth, email, sifre);
+      }
+      setGirisModalAcik(false); // Başarılıysa pencereyi kapat
+      setEmail("");
+      setSifre("");
+    } catch (hata: any) {
+      console.error("İşlem hatası:", hata);
+      if (hata.code === 'auth/email-already-in-use') alert("Bu e-posta adresi zaten kullanımda.");
+      else if (hata.code === 'auth/wrong-password' || hata.code === 'auth/invalid-credential') alert("Hatalı e-posta veya şifre girdiniz.");
+      else if (hata.code === 'auth/weak-password') alert("Şifreniz en az 6 karakter olmalıdır.");
+      else alert("Bir hata oluştu. Lütfen bilgilerinizi kontrol edin.");
+    }
+  };
   const [kullanici, setKullanici] = useState<User | null>(null);
   const [girisModalAcik, setGirisModalAcik] = useState(false);
 
@@ -788,8 +816,8 @@ export default function Home() {
           </div>
         </div>
       )}
-      {/* Kullanıcı Giriş Modal'ı */}
-      {girisModalAcik && (
+{/* Kullanıcı Giriş Modal'ı */}
+{girisModalAcik && (
         <div className="fixed inset-0 z-[80] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm">
           <div className="relative w-full max-w-sm rounded-3xl bg-white p-8 shadow-2xl text-center">
             <button
@@ -802,22 +830,69 @@ export default function Home() {
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-3xl shadow-inner">
               🏕️
             </div>
-            <h3 className="mb-2 text-2xl font-bold text-gray-900">Hoş Geldiniz</h3>
-            <p className="mb-8 text-sm text-gray-500">
-              Hızlıca rezervasyon yapmak ve maceralarınızı kaydetmek için giriş yapın.
+            <h3 className="mb-2 text-2xl font-bold text-gray-900">
+              {kayitMi ? "Kayıt Ol" : "Hoş Geldiniz"}
+            </h3>
+            <p className="mb-6 text-sm text-gray-500">
+              {kayitMi ? "Yeni bir macera için hemen hesabınızı oluşturun." : "Hızlıca rezervasyon yapmak için giriş yapın."}
             </p>
+            
+            <form onSubmit={epostaIslemi} className="mb-6 space-y-3 text-left">
+              <div>
+                <label className="mb-1 block text-xs font-bold text-gray-700">E-posta</label>
+                <input 
+                  type="email" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="ornek@mail.com" 
+                  className="w-full rounded-xl border border-gray-300 p-3 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+                  required
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-bold text-gray-700">Şifre</label>
+                <input 
+                  type="password" 
+                  value={sifre}
+                  onChange={(e) => setSifre(e.target.value)}
+                  placeholder="••••••" 
+                  className="w-full rounded-xl border border-gray-300 p-3 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+                  required
+                />
+              </div>
+              <button
+                type="submit"
+                className="mt-2 w-full rounded-xl bg-emerald-600 px-4 py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-emerald-500"
+              >
+                {kayitMi ? "Kayıt Ol" : "Giriş Yap"}
+              </button>
+            </form>
+
+            <div className="mb-6 flex items-center justify-center gap-2 text-sm text-gray-500">
+              <span>{kayitMi ? "Zaten üye misiniz?" : "Hesabınız yok mu?"}</span>
+              <button 
+                type="button"
+                onClick={() => setKayitMi(!kayitMi)}
+                className="font-bold text-emerald-600 hover:text-emerald-500"
+              >
+                {kayitMi ? "Giriş Yapın" : "Kayıt Olun"}
+              </button>
+            </div>
+
+            <div className="mb-6 flex items-center gap-3">
+              <div className="h-px flex-1 bg-gray-200"></div>
+              <span className="text-xs font-medium text-gray-400">VEYA</span>
+              <div className="h-px flex-1 bg-gray-200"></div>
+            </div>
             
             <button
               onClick={googleIleGirisYap}
+              type="button"
               className="flex w-full items-center justify-center gap-3 rounded-xl border-2 border-gray-200 bg-white px-4 py-3.5 text-sm font-bold text-gray-700 shadow-sm transition-all hover:border-emerald-400 hover:bg-emerald-50 active:scale-[0.98]"
             >
               <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google Logo" className="h-5 w-5" />
               Google ile Devam Et
             </button>
-            
-            <p className="mt-6 text-xs font-medium text-gray-400">
-              Devam ederek kullanım koşullarını kabul etmiş olursunuz.
-            </p>
           </div>
         </div>
       )}
