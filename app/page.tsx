@@ -175,32 +175,39 @@ export default function Home() {
   const [sifre, setSifre] = useState("");
   const [kayitMi, setKayitMi] = useState(false); // true ise Kayıt Ol, false ise Giriş Yap ekranı
 
-  // E-posta ile Kayıt/Giriş fonksiyonu
-  const epostaIslemi = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email || !sifre) {
-      alert("Lütfen e-posta ve şifrenizi girin.");
-      return;
+// E-posta ile Kayıt/Giriş fonksiyonu
+const epostaIslemi = async (e: React.FormEvent) => {
+  e.preventDefault();
+  if (!email || !sifre) {
+    alert("Lütfen e-posta ve şifrenizi girin.");
+    return;
+  }
+
+  // Sadece "Kayıt Ol" aşamasında şifre kurallarını kontrol et
+  if (kayitMi) {
+    const sifreKurallari = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,16}$/;
+    if (!sifreKurallari.test(sifre)) {
+      alert("Şifreniz 8-16 karakter uzunluğunda olmalı ve en az bir büyük harf, bir rakam ve bir özel karakter (noktalama işareti) içermelidir.");
+      return; // Kurallara uymazsa işlemi burada durdur
     }
-    try {
-      if (kayitMi) {
-        // Yeni kayıt oluştur
-        await createUserWithEmailAndPassword(auth, email, sifre);
-      } else {
-        // Var olan hesaba giriş yap
-        await signInWithEmailAndPassword(auth, email, sifre);
-      }
-      setGirisModalAcik(false); // Başarılıysa pencereyi kapat
-      setEmail("");
-      setSifre("");
-    } catch (hata: any) {
-      console.error("İşlem hatası:", hata);
-      if (hata.code === 'auth/email-already-in-use') alert("Bu e-posta adresi zaten kullanımda.");
-      else if (hata.code === 'auth/wrong-password' || hata.code === 'auth/invalid-credential') alert("Hatalı e-posta veya şifre girdiniz.");
-      else if (hata.code === 'auth/weak-password') alert("Şifreniz en az 6 karakter olmalıdır.");
-      else alert("Bir hata oluştu. Lütfen bilgilerinizi kontrol edin.");
+  }
+
+  try {
+    if (kayitMi) {
+      await createUserWithEmailAndPassword(auth, email, sifre);
+    } else {
+      await signInWithEmailAndPassword(auth, email, sifre);
     }
-  };
+    setGirisModalAcik(false); 
+    setEmail("");
+    setSifre("");
+  } catch (hata: any) {
+    console.error("İşlem hatası:", hata);
+    if (hata.code === 'auth/email-already-in-use') alert("Bu e-posta adresi zaten kullanımda.");
+    else if (hata.code === 'auth/wrong-password' || hata.code === 'auth/invalid-credential') alert("Hatalı e-posta veya şifre girdiniz.");
+    else alert("Bir hata oluştu. Lütfen bilgilerinizi kontrol edin.");
+  }
+};
   const [kullanici, setKullanici] = useState<User | null>(null);
   const [girisModalAcik, setGirisModalAcik] = useState(false);
 
@@ -777,7 +784,7 @@ export default function Home() {
             <div className="space-y-4">
               <div>
                 <label className="mb-1.5 block text-xs font-bold text-gray-700">Kart Üzerindeki İsim</label>
-                <input type="text" placeholder="Örn: Taliha Dönmez" className="w-full rounded-xl border border-gray-300 p-3 text-sm text-gray-900 placeholder-gray-500 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200" />
+                <input type="text" placeholder="Örn: Taliha Dönmez" className="w-full rounded-xl border border-gray-300 p-3 text-sm text-gray-900 placeholder-gray-800 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200" />
               </div>
               
               <div>
