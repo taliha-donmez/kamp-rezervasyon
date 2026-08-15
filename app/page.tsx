@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useEffect } from "react";
 import { signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, User, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, onSnapshot } from "firebase/firestore";
 import { auth, db } from "../firebase";
 
 type KampAlani = {
@@ -171,53 +171,59 @@ function hesaplaToplam(
 }
 
 export default function Home() {
-  // --- KULLANICI GİRİŞ SİSTEMİ DURUMLARI ---
   const [email, setEmail] = useState("");
   const [sifre, setSifre] = useState("");
   const [kayitMi, setKayitMi] = useState(false); 
-
-// E-posta ile Kayıt/Giriş fonksiyonu
-const epostaIslemi = async (e: React.FormEvent) => {
-  e.preventDefault();
-  if (!email || !sifre) {
-    alert("Lütfen e-posta ve şifrenizi girin.");
-    return;
-  }
-
-  if (kayitMi) {
-    // Vercel'in kafasını karıştırmayacak, güvenli ve temiz Regex (Şifre kuralı)
-    const sifreKurallari = /^(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).{8,16}$/;
-    if (!sifreKurallari.test(sifre)) {
-      alert("Şifreniz 8-16 karakter uzunluğunda olmalı ve en az bir büyük harf, bir rakam ve bir özel karakter (noktalama işareti) içermelidir.");
-      return; 
-    }
-  }
-
-  try {
-    if (kayitMi) {
-      await createUserWithEmailAndPassword(auth, email, sifre);
-    } else {
-      await signInWithEmailAndPassword(auth, email, sifre);
-    }
-    setGirisModalAcik(false); 
-    setEmail("");
-    setSifre("");
-  } catch (hata: any) {
-    console.error("İşlem hatası:", hata);
-    if (hata.code === 'auth/email-already-in-use') alert("Bu e-posta adresi zaten kullanımda.");
-    else if (hata.code === 'auth/wrong-password' || hata.code === 'auth/invalid-credential') alert("Hatalı e-posta veya şifre girdiniz.");
-    else alert("Bir hata oluştu. Lütfen bilgilerinizi kontrol edin.");
-  }
-};
-
   const [kullanici, setKullanici] = useState<User | null>(null);
   const [girisModalAcik, setGirisModalAcik] = useState(false);
+  const [mevcutRezervasyonlar, setMevcutRezervasyonlar] = useState<any[]>([]);
+
+  const epostaIslemi = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !sifre) {
+      alert("Lütfen e-posta ve şifrenizi girin.");
+      return;
+    }
+
+    if (kayitMi) {
+      const sifreKurallari = /^(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).{8,16}$/;
+      if (!sifreKurallari.test(sifre)) {
+        alert("Şifreniz 8-16 karakter uzunluğunda olmalı ve en az bir büyük harf, bir rakam ve bir özel karakter (noktalama işareti) içermelidir.");
+        return; 
+      }
+    }
+
+    try {
+      if (kayitMi) {
+        await createUserWithEmailAndPassword(auth, email, sifre);
+      } else {
+        await signInWithEmailAndPassword(auth, email, sifre);
+      }
+      setGirisModalAcik(false); 
+      setEmail("");
+      setSifre("");
+    } catch (hata: any) {
+      console.error("İşlem hatası:", hata);
+      if (hata.code === 'auth/email-already-in-use') alert("Bu e-posta adresi zaten kullanımda.");
+      else if (hata.code === 'auth/wrong-password' || hata.code === 'auth/invalid-credential') alert("Hatalı e-posta veya şifre girdiniz.");
+      else alert("Bir hata oluştu. Lütfen bilgilerinizi kontrol edin.");
+    }
+  };
 
   useEffect(() => {
     const abonelik = onAuthStateChanged(auth, (guncelKullanici) => {
       setKullanici(guncelKullanici);
     });
     return () => abonelik();
+  }, []);
+
+  // Veritabanındaki rezervasyonları dinle
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, "rezervasyonlar"), (snapshot: any) => {
+      const veriler = snapshot.docs.map((doc: any) => doc.data());
+      setMevcutRezervasyonlar(veriler);
+    });
+    return () => unsubscribe();
   }, []);
 
   const googleIleGirisYap = async () => {
@@ -239,7 +245,6 @@ const epostaIslemi = async (e: React.FormEvent) => {
     }
   };
 
-  // ------------------------------------------
   const [modalAcik, setModalAcik] = useState(false);
   const [odemeModalAcik, setOdemeModalAcik] = useState(false);
   const [seciliKamp, setSeciliKamp] = useState<KampAlani | null>(null);
@@ -317,9 +322,7 @@ const epostaIslemi = async (e: React.FormEvent) => {
 
   return (
     <main className="min-h-full bg-gradient-to-b from-emerald-50 via-white to-amber-50/40">
-      {/* Hero */}
       <header className="relative overflow-hidden border-b border-emerald-100/80 bg-white/70 backdrop-blur-sm">
-        {/* Üst Kullanıcı Menüsü */}
         <div className="absolute right-0 top-0 z-20 w-full px-6 py-4 flex justify-end">
           {kullanici ? (
             <div className="flex items-center gap-4 rounded-full bg-white/80 px-5 py-2 shadow-sm backdrop-blur-md border border-gray-100">
@@ -364,7 +367,6 @@ const epostaIslemi = async (e: React.FormEvent) => {
         </div>
       </header>
 
-      {/* Kamp Alanları */}
       <section className="mx-auto max-w-6xl px-6 py-12 sm:py-16">
         <div className="mb-10 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
@@ -467,7 +469,6 @@ const epostaIslemi = async (e: React.FormEvent) => {
           />
 
           <div className="relative z-10 flex max-h-[92vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
-            {/* Modal Header */}
             <div className="border-b border-gray-100 px-6 py-4">
               <div className="flex items-start justify-between">
                 <div className="flex-1 pr-4">
@@ -510,7 +511,6 @@ const epostaIslemi = async (e: React.FormEvent) => {
             </div>
 
             <div className="flex-1 overflow-y-auto px-6 py-5">
-              {/* Tarih Seçimi */}
               <div className="mb-6">
                 <p className="mb-3 text-sm font-medium text-gray-700">
                   Konaklama Tarihleri
@@ -561,13 +561,11 @@ const epostaIslemi = async (e: React.FormEvent) => {
                 </p>
 
                 <div className="overflow-hidden rounded-xl border border-gray-200">
-                  {/* Deniz şeridi */}
                   <div className="flex items-center justify-center gap-2 bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 px-4 py-3 text-sm font-semibold text-white">
                     <span>🌊</span>
                     <span>Deniz</span>
                   </div>
 
-                  {/* Parsel grid */}
                   <div className="space-y-2 bg-emerald-50/80 p-3">
                     {Array.from({ length: KROKI_SATIR }).map((_, satir) => (
                       <div
@@ -582,17 +580,26 @@ const epostaIslemi = async (e: React.FormEvent) => {
                             const parselNo =
                               satir * KROKI_SUTUN + sutun + 1;
 
+                            // ÇAKIŞMA KONTROLÜ
+                            const parselDoluMu = mevcutRezervasyonlar.some((rez) => {
+                              const tarihCakisiyorMu = (girisTarihi < rez.cikisTarihi && cikisTarihi > rez.girisTarihi);
+                              return rez.parsel.satir === satir && rez.parsel.sutun === sutun && tarihCakisiyorMu && rez.kampAdi === seciliKamp?.ad;
+                            });
+
                             return (
                               <button
                                 key={sutun}
                                 type="button"
+                                disabled={parselDoluMu}
                                 onClick={() =>
                                   setSeciliParsel({ satir, sutun })
                                 }
                                 className={`flex aspect-square items-center justify-center rounded-lg border-2 text-xs font-semibold transition-all ${
-                                  secili
-                                    ? "border-emerald-600 bg-emerald-500 text-white shadow-md shadow-emerald-200"
-                                    : "border-emerald-200 bg-white text-emerald-800 hover:border-emerald-400 hover:bg-emerald-50"
+                                  parselDoluMu
+                                    ? "bg-red-500 border-red-500 text-white cursor-not-allowed opacity-50"
+                                    : secili
+                                      ? "border-emerald-600 bg-emerald-500 text-white shadow-md shadow-emerald-200"
+                                      : "border-emerald-200 bg-white text-emerald-800 hover:border-emerald-400 hover:bg-emerald-50"
                                 }`}
                               >
                                 {parselNo}
@@ -618,7 +625,6 @@ const epostaIslemi = async (e: React.FormEvent) => {
                 </p>
               </div>
 
-              {/* Ekstralar / Bilgi — kamp türüne göre */}
               {tahtaCadirMi(seciliKamp) ? (
                 <div className="mt-6 rounded-xl border border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50 p-5">
                   <p className="text-sm leading-relaxed text-amber-900">
@@ -672,7 +678,7 @@ const epostaIslemi = async (e: React.FormEvent) => {
                           </div>
                         </div>
 
-                        <label className="flex cursor-pointer gap-3 rounded-xl border border-gray-200 p-4 transition hover:border-emerald-200 hover:bg-emerald-50/50 has-checked:border-emerald-400 has-checked:bg-emerald-50">
+                        <label className="flex cursor-pointer gap-3 rounded-xl border border-gray-200 p-4 transition hover:border-emerald-200 hover:bg-emerald-50/50">
                           <input
                             type="checkbox"
                             checked={sungerYatak}
@@ -685,7 +691,7 @@ const epostaIslemi = async (e: React.FormEvent) => {
                           </span>
                         </label>
 
-                        <label className="flex cursor-pointer gap-3 rounded-xl border border-gray-200 p-4 transition hover:border-emerald-200 hover:bg-emerald-50/50 has-checked:border-emerald-400 has-checked:bg-emerald-50">
+                        <label className="flex cursor-pointer gap-3 rounded-xl border border-gray-200 p-4 transition hover:border-emerald-200 hover:bg-emerald-50/50">
                           <input
                             type="checkbox"
                             checked={sungerYastik}
@@ -706,7 +712,7 @@ const epostaIslemi = async (e: React.FormEvent) => {
 
                     {(cadirMi(seciliKamp) || karavanMi(seciliKamp)) && (
                       <>
-                        <label className="flex cursor-pointer gap-3 rounded-xl border border-gray-200 p-4 transition hover:border-emerald-200 hover:bg-emerald-50/50 has-checked:border-emerald-400 has-checked:bg-emerald-50">
+                        <label className="flex cursor-pointer gap-3 rounded-xl border border-gray-200 p-4 transition hover:border-emerald-200 hover:bg-emerald-50/50">
                           <input
                             type="checkbox"
                             checked={masa}
@@ -724,7 +730,7 @@ const epostaIslemi = async (e: React.FormEvent) => {
                           </span>
                         </label>
 
-                        <label className="flex cursor-pointer gap-3 rounded-xl border border-gray-200 p-4 transition hover:border-emerald-200 hover:bg-emerald-50/50 has-checked:border-emerald-400 has-checked:bg-emerald-50">
+                        <label className="flex cursor-pointer gap-3 rounded-xl border border-gray-200 p-4 transition hover:border-emerald-200 hover:bg-emerald-50/50">
                           <input
                             type="checkbox"
                             checked={buzdolabi}
@@ -748,7 +754,6 @@ const epostaIslemi = async (e: React.FormEvent) => {
               )}
             </div>
 
-            {/* Modal Footer */}
             <div className="border-t border-gray-100 bg-gray-50 px-6 py-5">
               <div className="mb-4 flex items-end justify-between">
                 <div>
@@ -787,22 +792,22 @@ const epostaIslemi = async (e: React.FormEvent) => {
             <div className="space-y-4">
               <div>
                 <label className="mb-1.5 block text-xs font-bold text-gray-700">Kart Üzerindeki İsim</label>
-                <input type="text" placeholder="Örn: Taliha Dönmez" className="w-full rounded-xl border border-gray-300 p-3 text-sm text-gray-900 placeholder-gray-500 font-medium focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200" />
+                <input type="text" placeholder="Örn: Taliha Dönmez" className="w-full rounded-xl border border-gray-300 p-3 text-sm text-gray-900 placeholder-gray-400 font-medium focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200" />
               </div>
               
               <div>
                 <label className="mb-1.5 block text-xs font-bold text-gray-700">Kart Numarası</label>
-                <input type="text" placeholder="0000 0000 0000 0000" maxLength={19} className="w-full rounded-xl border border-gray-300 p-3 text-sm font-medium tracking-widest text-gray-900 placeholder-gray-500 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200" />
+                <input type="text" placeholder="0000 0000 0000 0000" maxLength={19} className="w-full rounded-xl border border-gray-300 p-3 text-sm font-medium tracking-widest text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200" />
               </div>
               
               <div className="flex gap-4">
                 <div className="flex-1">
                   <label className="mb-1.5 block text-xs font-bold text-gray-700">Son Kullanma (AA/YY)</label>
-                  <input type="text" placeholder="12/26" maxLength={5} className="w-full rounded-xl border border-gray-300 p-3 text-sm text-gray-900 placeholder-gray-500 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200" />
+                  <input type="text" placeholder="12/26" maxLength={5} className="w-full rounded-xl border border-gray-300 p-3 text-sm text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200" />
                 </div>
                 <div className="flex-1">
                   <label className="mb-1.5 block text-xs font-bold text-gray-700">CVV</label>
-                  <input type="text" placeholder="***" maxLength={3} className="w-full rounded-xl border border-gray-300 p-3 text-sm text-gray-900 placeholder-gray-500 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200" />
+                  <input type="text" placeholder="***" maxLength={3} className="w-full rounded-xl border border-gray-300 p-3 text-sm text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200" />
                 </div>
               </div>
 
