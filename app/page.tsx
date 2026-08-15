@@ -2,7 +2,8 @@
 
 import { useMemo, useState, useEffect } from "react";
 import { signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, User, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../firebase";
+import { auth, db } from "../firebase";
+import { collection, addDoc } from "firebase/firestore";
 
 type KampAlani = {
   id: number;
@@ -803,12 +804,32 @@ const epostaIslemi = async (e: React.FormEvent) => {
                 </div>
               </div>
 
-              <div className="mt-6 pt-4 border-t border-gray-100">
-                <button 
-                  onClick={() => {
-                    alert("Harika! Rezervasyonunuz başarıyla tamamlandı. İyi kamplar!");
-                    setOdemeModalAcik(false);
-                    modalKapat();
+              <button 
+                  onClick={async () => {
+                    if (!kullanici) {
+                      alert("Lütfen önce giriş yapın veya kayıt olun!");
+                      return;
+                    }
+                    try {
+                      // Firebase 'rezervasyonlar' koleksiyonuna veriyi kaydediyoruz
+                      await addDoc(collection(db, "rezervasyonlar"), {
+                        kullaniciId: kullanici.uid,
+                        kullaniciAdi: kullanici.displayName || kullanici.email,
+                        kampAdi: seciliKamp?.ad,
+                        girisTarihi: girisTarihi,
+                        cikisTarihi: cikisTarihi,
+                        parsel: seciliParsel,
+                        toplamTutar: toplamTutar,
+                        kayitZamani: new Date().toISOString()
+                      });
+
+                      alert("Harika! Rezervasyonunuz başarıyla tamamlandı. İyi kamplar!");
+                      setOdemeModalAcik(false);
+                      modalKapat();
+                    } catch (error) {
+                      console.error("Kayıt hatası:", error);
+                      alert("Rezervasyon kaydedilirken bir hata oluştu.");
+                    }
                   }}
                   className="w-full rounded-xl bg-emerald-600 px-4 py-3.5 text-sm font-semibold text-white shadow-md transition hover:bg-emerald-500"
                 >
