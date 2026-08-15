@@ -865,6 +865,7 @@ const epostaIslemi = async (e: React.FormEvent) => {
                   value={sifre}
                   onChange={(e) => setSifre(e.target.value)}
                   placeholder="••••••" 
+                  maxLength={16} 
                   className="w-full rounded-xl border border-gray-300 p-3 text-sm text-gray-900 placeholder-gray-400 font-medium focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
                   required
                 />
