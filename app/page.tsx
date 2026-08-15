@@ -1,6 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
+import { signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, User } from "firebase/auth";
+import { auth } from "../firebase";
 
 type KampAlani = {
   id: number;
@@ -168,6 +170,39 @@ function hesaplaToplam(
 }
 
 export default function Home() {
+  // --- KULLANICI GİRİŞ SİSTEMİ DURUMLARI ---
+  const [kullanici, setKullanici] = useState<User | null>(null);
+  const [girisModalAcik, setGirisModalAcik] = useState(false);
+
+  // Kullanıcının giriş yapıp yapmadığını sürekli dinleyen sistem
+  useEffect(() => {
+    const abonelik = onAuthStateChanged(auth, (guncelKullanici) => {
+      setKullanici(guncelKullanici);
+    });
+    return () => abonelik();
+  }, []);
+
+  // Google ile giriş fonksiyonu
+  const googleIleGirisYap = async () => {
+    const saglayici = new GoogleAuthProvider();
+    try {
+      await signInWithPopup(auth, saglayici);
+      setGirisModalAcik(false);
+    } catch (hata) {
+      console.error("Giriş hatası:", hata);
+      alert("Giriş yaparken bir hata oluştu. Lütfen tekrar deneyin.");
+    }
+  };
+
+  // Çıkış yapma fonksiyonu
+  const cikisYap = async () => {
+    try {
+      await signOut(auth);
+    } catch (hata) {
+      console.error("Çıkış hatası:", hata);
+    }
+  };
+  // ------------------------------------------
   const [modalAcik, setModalAcik] = useState(false);
   const [odemeModalAcik, setOdemeModalAcik] = useState(false);
   const [seciliKamp, setSeciliKamp] = useState<KampAlani | null>(null);
@@ -245,14 +280,43 @@ export default function Home() {
     <main className="min-h-full bg-gradient-to-b from-emerald-50 via-white to-amber-50/40">
       {/* Hero */}
       <header className="relative overflow-hidden border-b border-emerald-100/80 bg-white/70 backdrop-blur-sm">
+        {/* Üst Kullanıcı Menüsü */}
+        <div className="absolute right-0 top-0 z-20 w-full px-6 py-4 flex justify-end">
+          {kullanici ? (
+            <div className="flex items-center gap-4 rounded-full bg-white/80 px-5 py-2 shadow-sm backdrop-blur-md border border-gray-100">
+              <div className="flex items-center gap-2">
+                {kullanici.photoURL ? (
+                  <img src={kullanici.photoURL} alt="Profil" className="h-7 w-7 rounded-full border border-emerald-200" />
+                ) : (
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold">👤</div>
+                )}
+                <span className="text-sm font-semibold text-gray-800">
+                  {kullanici.displayName || "Kampçı"}
+                </span>
+              </div>
+              <div className="h-4 w-px bg-gray-300"></div>
+              <button onClick={cikisYap} className="text-xs font-bold text-gray-500 transition hover:text-red-500">
+                ÇIKIŞ YAP
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setGirisModalAcik(true)}
+              className="z-20 rounded-full bg-emerald-600 px-6 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:bg-emerald-500 hover:shadow-lg hover:shadow-emerald-200"
+            >
+              Giriş Yap / Üye Ol
+            </button>
+          )}
+        </div>
+
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-100/60 via-transparent to-transparent" />
-        <div className="relative mx-auto max-w-6xl px-6 py-14 sm:py-20">
+        <div className="relative mx-auto max-w-6xl px-6 py-14 sm:py-20 mt-8">
           <p className="mb-3 inline-flex items-center gap-2 rounded-full bg-emerald-100 px-4 py-1.5 text-sm font-medium text-emerald-800">
             <span className="h-2 w-2 rounded-full bg-emerald-500" />
             Doğayla iç içe konaklama
           </p>
           <h1 className="max-w-2xl text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
-          Dikilitaş Kamp Alanı Rezervasyon
+            Dikilitaş Kamp Alanı Rezervasyon
           </h1>
           <p className="mt-4 max-w-xl text-lg leading-relaxed text-gray-600">
             Çadır ve karavan alanlarımızı keşfedin, detayları inceleyin ve
@@ -721,6 +785,39 @@ export default function Home() {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+      {/* Kullanıcı Giriş Modal'ı */}
+      {girisModalAcik && (
+        <div className="fixed inset-0 z-[80] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm">
+          <div className="relative w-full max-w-sm rounded-3xl bg-white p-8 shadow-2xl text-center">
+            <button
+              onClick={() => setGirisModalAcik(false)}
+              className="absolute right-4 top-4 rounded-full p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition"
+            >
+              ✕
+            </button>
+            
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-3xl shadow-inner">
+              🏕️
+            </div>
+            <h3 className="mb-2 text-2xl font-bold text-gray-900">Hoş Geldiniz</h3>
+            <p className="mb-8 text-sm text-gray-500">
+              Hızlıca rezervasyon yapmak ve maceralarınızı kaydetmek için giriş yapın.
+            </p>
+            
+            <button
+              onClick={googleIleGirisYap}
+              className="flex w-full items-center justify-center gap-3 rounded-xl border-2 border-gray-200 bg-white px-4 py-3.5 text-sm font-bold text-gray-700 shadow-sm transition-all hover:border-emerald-400 hover:bg-emerald-50 active:scale-[0.98]"
+            >
+              <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google Logo" className="h-5 w-5" />
+              Google ile Devam Et
+            </button>
+            
+            <p className="mt-6 text-xs font-medium text-gray-400">
+              Devam ederek kullanım koşullarını kabul etmiş olursunuz.
+            </p>
           </div>
         </div>
       )}
