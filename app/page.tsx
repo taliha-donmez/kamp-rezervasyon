@@ -256,6 +256,10 @@ export default function Home() {
   const [kendiCadir, setKendiCadir] = useState<KendiCadirSecimi>("yok");
   const [girisTarihi, setGirisTarihi] = useState("");
   const [cikisTarihi, setCikisTarihi] = useState("");
+  const [kartIsim, setKartIsim] = useState("");
+  const [kartNumara, setKartNumara] = useState("");
+  const [sonKullanma, setSonKullanma] = useState("");
+  const [cvv, setCvv] = useState("");
   
   const bugunTarihi = new Date();
   const bugun = `${bugunTarihi.getFullYear()}-${String(bugunTarihi.getMonth() + 1).padStart(2, "0")}-${String(bugunTarihi.getDate()).padStart(2, "0")}`;
@@ -783,8 +787,8 @@ export default function Home() {
         </div>
       )}
 
-      {/* Ödeme Modal */}
-      {odemeModalAcik && (
+{/* Ödeme Modal */}
+{odemeModalAcik && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm">
           <div className="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
             <h3 className="mb-4 text-xl font-bold text-gray-900">Ödeme Bilgileri</h3>
@@ -792,22 +796,69 @@ export default function Home() {
             <div className="space-y-4">
               <div>
                 <label className="mb-1.5 block text-xs font-bold text-gray-700">Kart Üzerindeki İsim</label>
-                <input type="text" placeholder="Örn: Taliha Dönmez" className="w-full rounded-xl border border-gray-300 p-3 text-sm text-gray-900 placeholder-gray-400 font-medium focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200" />
+                <input 
+                  type="text" 
+                  placeholder="Örn: Taliha Dönmez" 
+                  value={kartIsim}
+                  onChange={(e) => {
+                    // Sadece harf ve boşluk kabul et
+                    let yazi = e.target.value.replace(/[^a-zA-ZğüşıöçĞÜŞİÖÇ\s]/g, "");
+                    // İlk harfleri büyük yap
+                    yazi = yazi.split(" ").map(kelime => kelime.charAt(0).toLocaleUpperCase("tr-TR") + kelime.slice(1).toLocaleLowerCase("tr-TR")).join(" ");
+                    setKartIsim(yazi);
+                  }}
+                  className="w-full rounded-xl border border-gray-300 p-3 text-sm text-gray-900 placeholder-gray-400 font-medium focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200" 
+                />
               </div>
               
               <div>
                 <label className="mb-1.5 block text-xs font-bold text-gray-700">Kart Numarası</label>
-                <input type="text" placeholder="0000 0000 0000 0000" maxLength={19} className="w-full rounded-xl border border-gray-300 p-3 text-sm font-medium tracking-widest text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200" />
+                <input 
+                  type="text" 
+                  placeholder="0000 0000 0000 0000" 
+                  maxLength={19} 
+                  value={kartNumara}
+                  onChange={(e) => {
+                    let rakamlar = e.target.value.replace(/\D/g, ""); 
+                    if (rakamlar.length > 16) rakamlar = rakamlar.slice(0, 16);
+                    let formatli = rakamlar.replace(/(\d{4})(?=\d)/g, "$1 ");
+                    setKartNumara(formatli);
+                  }}
+                  className="w-full rounded-xl border border-gray-300 p-3 text-sm font-medium tracking-widest text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200" 
+                />
               </div>
               
               <div className="flex gap-4">
                 <div className="flex-1">
                   <label className="mb-1.5 block text-xs font-bold text-gray-700">Son Kullanma (AA/YY)</label>
-                  <input type="text" placeholder="12/26" maxLength={5} className="w-full rounded-xl border border-gray-300 p-3 text-sm text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200" />
+                  <input 
+                    type="text" 
+                    placeholder="12/26" 
+                    maxLength={5} 
+                    value={sonKullanma}
+                    onChange={(e) => {
+                      let rakamlar = e.target.value.replace(/\D/g, "");
+                      if (rakamlar.length > 4) rakamlar = rakamlar.slice(0, 4);
+                      if (rakamlar.length > 2) rakamlar = rakamlar.slice(0, 2) + "/" + rakamlar.slice(2);
+                      setSonKullanma(rakamlar);
+                    }}
+                    className="w-full rounded-xl border border-gray-300 p-3 text-sm text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200" 
+                  />
                 </div>
                 <div className="flex-1">
                   <label className="mb-1.5 block text-xs font-bold text-gray-700">CVV</label>
-                  <input type="text" placeholder="***" maxLength={3} className="w-full rounded-xl border border-gray-300 p-3 text-sm text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200" />
+                  <input 
+                    type="text" 
+                    placeholder="***" 
+                    maxLength={3} 
+                    value={cvv}
+                    onChange={(e) => {
+                      let rakamlar = e.target.value.replace(/\D/g, "");
+                      if (rakamlar.length > 3) rakamlar = rakamlar.slice(0, 3);
+                      setCvv(rakamlar);
+                    }}
+                    className="w-full rounded-xl border border-gray-300 p-3 text-sm text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200" 
+                  />
                 </div>
               </div>
 
@@ -853,7 +904,7 @@ export default function Home() {
           </div>
         </div>
       )}
-
+      
       {/* Kullanıcı Giriş Modal'ı */}
       {girisModalAcik && (
         <div className="fixed inset-0 z-[80] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm">
