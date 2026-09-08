@@ -1,4 +1,5 @@
 "use client";
+import LocationSection from "./components/LocationSection";
 
 import { useMemo, useState, useEffect } from "react";
 import { signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, User, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
@@ -473,8 +474,10 @@ export default function Home() {
           ))}
         </div>
       </section>
+      
 
       <footer className="border-t border-gray-100 bg-white/50 py-8 text-center text-sm text-gray-500">
+      
         © 2026 Kamp Rezervasyon — Doğada unutulmaz anılar
       </footer>
 
