@@ -1,5 +1,5 @@
 "use client";
-import LocationSection from "./components/LocationSection";
+
 
 import { useMemo, useState, useEffect } from "react";
 import { signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, User, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
@@ -8,6 +8,7 @@ import { auth, db } from "../firebase";
 import { useAuth } from "../hooks/useAuth";
 import Link from "next/link";
 import WeatherWidget from "../app/components/WeatherWidget"; 
+import LocationSection from "./components/LocationSection";
 
 type KampAlani = {
   id: number;
@@ -392,7 +393,8 @@ export default function Home() {
           </p>
         </div>
       </header>
-
+      {/* HARİTA BİLEŞENİ BURAYA GELECEK */}
+    <LocationSection />
       <section className="mx-auto max-w-6xl px-6 py-12 sm:py-16">
         <div className="mb-10 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
