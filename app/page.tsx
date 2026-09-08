@@ -2,7 +2,7 @@
 
 
 import { useMemo, useState, useEffect } from "react";
-import { signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, User, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, User, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
 import { collection, addDoc, onSnapshot } from "firebase/firestore";
 import { auth, db } from "../firebase";
 import { useAuth } from "../hooks/useAuth";
@@ -242,7 +242,21 @@ export default function Home() {
       alert("Giriş yaparken bir hata oluştu. Lütfen tekrar deneyin.");
     }
   };
-
+    const sifremiUnuttum = async () => {
+      if (!email) {
+        alert("Lütfen şifrenizi sıfırlamak için önce e-posta adresinizi girin.");
+        return;
+      }
+  
+      try {
+        await sendPasswordResetEmail(auth, email);
+        alert("Şifre sıfırlama bağlantısı e-posta adresinize gönderildi!");
+      } catch (error: any) {
+        console.error("Şifre sıfırlama hatası:", error);
+        alert("Bir hata oluştu. E-posta adresinin doğru olduğundan emin olun.");
+      }
+    };
+   
   const cikisYap = async () => {
     try {
       await signOut(auth);
@@ -967,14 +981,26 @@ export default function Home() {
               <div>
                 <label className="mb-1 block text-xs font-bold text-gray-700">Şifre</label>
                 <input 
-                  type="password" 
+                  type="password"
                   value={sifre}
                   onChange={(e) => setSifre(e.target.value)}
-                  placeholder="••••••" 
+                  placeholder="••••••"
                   maxLength={16}
-                  className="w-full rounded-xl border border-gray-300 p-3 text-sm text-gray-900 placeholder-gray-400 font-medium focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+                  className="w-full rounded-xl border border-gray-300 p-3 text-sm text-gray-900 placeholder-gray-400 font-medium focus:border-emerald-500 focus:outline-none"
                   required
                 />
+          
+                {!kayitMi && (
+                  <div className="mt-2 flex justify-end">
+                    <button
+                      type="button"
+                      onClick={sifremiUnuttum}
+                      className="text-xs font-medium text-emerald-600 hover:text-emerald-700 hover:underline"
+                    >
+                      Şifremi Unuttum?
+                    </button>
+                  </div>
+                )}
               </div>
               <button
                 type="submit"
