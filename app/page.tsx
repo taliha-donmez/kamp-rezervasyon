@@ -6,6 +6,7 @@ import { collection, addDoc, onSnapshot } from "firebase/firestore";
 import { auth, db } from "../firebase";
 import { useAuth } from "../hooks/useAuth";
 import Link from "next/link";
+import WeatherWidget from "../app/components/WeatherWidget"; 
 
 type KampAlani = {
   id: number;
@@ -371,6 +372,12 @@ export default function Home() {
 
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-100/60 via-transparent to-transparent" />
         <div className="relative mx-auto max-w-6xl px-6 py-14 sm:py-20 mt-8">
+          
+          {/* HAVA DURUMU WIDGET'I BURAYA EKLENİYOR */}
+          <div className="mb-6 inline-block">
+            <WeatherWidget />
+          </div>
+
           <p className="mb-3 inline-flex items-center gap-2 rounded-full bg-emerald-100 px-4 py-1.5 text-sm font-medium text-emerald-800">
             <span className="h-2 w-2 rounded-full bg-emerald-500" />
             Doğayla iç içe konaklama
