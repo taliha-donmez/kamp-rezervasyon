@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 
-// OpenWeather API'den dönecek verinin yapısı (sadece ihtiyacımız olanlar)
 type WeatherData = {
   main: { temp: number };
   weather: [{ description: string; icon: string }];
@@ -18,8 +17,10 @@ export default function WeatherWidget() {
     const fetchWeather = async () => {
       try {
         const apiKey = process.env.NEXT_PUBLIC_WEATHER_API_KEY;
-        // Dikilitaş'ın bağlı olduğu Mersin koordinatları veya şehir adı (Mersin,TR)
-        const city = "Mersin,TR"; 
+        
+        // Dikilitaş Kamp Alanı'nın tam koordinatları (Bozyazı/Anamur - Mersin)
+        const lat = "36.0899";
+        const lon = "32.9221"; 
         
         if (!apiKey) {
           console.error("API Key bulunamadı!");
@@ -29,7 +30,7 @@ export default function WeatherWidget() {
         }
 
         const res = await fetch(
-          `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&lang=tr&appid=${apiKey}`
+          `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&lang=tr&appid=${apiKey}`
         );
 
         if (!res.ok) throw new Error("Hava durumu çekilemedi");
@@ -48,9 +49,8 @@ export default function WeatherWidget() {
   }, []);
 
   if (loading) return <div className="animate-pulse bg-emerald-50 h-16 rounded-xl w-48"></div>;
-  if (error || !weather) return null; // Hata varsa veya veri yoksa widget'ı gizle
+  if (error || !weather) return null;
 
-  // Hava durumuna göre dinamik açıklama baş harflerini büyüt
   const desc = weather.weather[0].description;
   const capitalizedDesc = desc.charAt(0).toUpperCase() + desc.slice(1);
   const temp = Math.round(weather.main.temp);
@@ -69,7 +69,7 @@ export default function WeatherWidget() {
            {temp}°C <span className="text-gray-400 font-normal mx-1">|</span> {capitalizedDesc}
         </p>
         <p className="text-xs font-medium text-emerald-600 uppercase tracking-wider mt-0.5">
-          {weather.name} / Dikilitaş
+          Dikilitaş Kamp Alanı
         </p>
       </div>
     </div>
