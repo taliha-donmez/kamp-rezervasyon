@@ -1,6 +1,6 @@
 "use client";
 
-
+import TranslateWidget from "./components/TranslateWidget";
 import { useMemo, useState, useEffect } from "react";
 import { signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, User, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
 import { collection, addDoc, onSnapshot } from "firebase/firestore";
@@ -346,6 +346,7 @@ export default function Home() {
 
   return (
     <main className="min-h-full bg-gradient-to-b from-emerald-50 via-white to-amber-50/40">
+      <TranslateWidget />
       <header className="relative overflow-hidden border-b border-emerald-100/80 bg-white/70 backdrop-blur-sm">
       <div className="absolute right-0 top-0 z-20 w-full px-6 py-4 flex justify-end">
           {kullanici ? (
