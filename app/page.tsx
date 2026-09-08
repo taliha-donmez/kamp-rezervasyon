@@ -4,6 +4,8 @@ import { useMemo, useState, useEffect } from "react";
 import { signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, User, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 import { collection, addDoc, onSnapshot } from "firebase/firestore";
 import { auth, db } from "../firebase";
+import { useAuth } from "../hooks/useAuth";
+import Link from "next/link";
 
 type KampAlani = {
   id: number;
@@ -171,6 +173,7 @@ function hesaplaToplam(
 }
 
 export default function Home() {
+  const { user, isAdmin, loading } = useAuth();
   const [email, setEmail] = useState("");
   const [sifre, setSifre] = useState("");
   const [kayitMi, setKayitMi] = useState(false); 
@@ -327,7 +330,7 @@ export default function Home() {
   return (
     <main className="min-h-full bg-gradient-to-b from-emerald-50 via-white to-amber-50/40">
       <header className="relative overflow-hidden border-b border-emerald-100/80 bg-white/70 backdrop-blur-sm">
-        <div className="absolute right-0 top-0 z-20 w-full px-6 py-4 flex justify-end">
+      <div className="absolute right-0 top-0 z-20 w-full px-6 py-4 flex justify-end">
           {kullanici ? (
             <div className="flex items-center gap-4 rounded-full bg-white/80 px-5 py-2 shadow-sm backdrop-blur-md border border-gray-100">
               <div className="flex items-center gap-2">
@@ -341,6 +344,17 @@ export default function Home() {
                 </span>
               </div>
               <div className="h-4 w-px bg-gray-300"></div>
+              
+              {/* ADMİN PANELİ BUTONU BURAYA EKLENDİ */}
+              {isAdmin && (
+                <>
+                  <Link href="/admin" className="text-xs font-bold text-emerald-600 transition hover:text-emerald-800">
+                    ADMİN PANELİ
+                  </Link>
+                  <div className="h-4 w-px bg-gray-300"></div>
+                </>
+              )}
+              
               <button onClick={cikisYap} className="text-xs font-bold text-gray-500 transition hover:text-red-500">
                 ÇIKIŞ YAP
               </button>
