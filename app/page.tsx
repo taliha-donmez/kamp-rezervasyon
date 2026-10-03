@@ -362,7 +362,10 @@ export default function Home() {
                 </span>
               </div>
               <div className="h-4 w-px bg-gray-300"></div>
-              
+              <Link href="/profil" className="text-xs font-bold text-emerald-600 transition hover:text-emerald-800">
+  PROFİLİM
+</Link>
+<div className="h-4 w-px bg-gray-300"></div>
               {/* ADMİN PANELİ BUTONU BURAYA EKLENDİ */}
               {isAdmin && (
                 <>
@@ -408,8 +411,7 @@ export default function Home() {
           </p>
         </div>
       </header>
-      {/* HARİTA BİLEŞENİ BURAYA GELECEK */}
-    <LocationSection />
+      
       <section className="mx-auto max-w-6xl px-6 py-12 sm:py-16">
         <div className="mb-10 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
@@ -492,6 +494,8 @@ export default function Home() {
         </div>
       </section>
       
+      {/* HARİTA BİLEŞENİ BURAYA GELECEK */}
+    <LocationSection />
 
       <footer className="border-t border-gray-100 bg-white/50 py-8 text-center text-sm text-gray-500">
       
