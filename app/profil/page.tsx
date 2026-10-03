@@ -151,20 +151,6 @@ export default function ProfilSayfasi() {
           </Link>
         </div>
 
-        {/* Kamp Alanı Bilgisi */}
-        <section className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-700 via-emerald-600 to-teal-500 p-6 text-white shadow-md sm:p-8">
-          <span
-            className="absolute -right-4 -top-6 select-none text-8xl opacity-20"
-            aria-hidden="true"
-          >
-            🌲
-          </span>
-          <h2 className="text-lg font-semibold">Dikilitaş Kamp Alanı</h2>
-          <p className="relative mt-3 max-w-2xl text-sm leading-relaxed text-emerald-50 sm:text-base">
-            {KAMP_BILGISI}
-          </p>
-        </section>
-
         {/* Rezervasyon Geçmişi */}
         <section>
           <h2 className="mb-4 text-xl font-semibold text-gray-900">

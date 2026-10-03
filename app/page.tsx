@@ -411,6 +411,24 @@ export default function Home() {
           </p>
         </div>
       </header>
+  
+      {/* KAMP BİLGİLENDİRME KARTI (BURAYA EKLENDİ) */}
+      <div className="mx-auto max-w-6xl px-6 pt-12">
+        <div className="rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-500 p-8 shadow-lg shadow-emerald-200/50 relative overflow-hidden">
+          {/* Arka plan deseni için hafif bir ikon efekti */}
+          <div className="absolute -right-10 -top-10 text-9xl text-white opacity-10">
+            🌲
+          </div>
+          
+          <h2 className="text-2xl font-bold text-white mb-4 relative z-10">
+            Dikilitaş Kamp Alanı
+          </h2>
+          <p className="text-emerald-50 text-lg leading-relaxed relative z-10 max-w-4xl">
+            Mersin'in Bozyazı ilçesinde, deniz kenarında ve kızılçam ağaçları arasında yer alan Dikilitaş 
+            Kamp Alanı; çadır ve karavan kampı için doğayla iç içe, huzurlu bir ortam sunmaktadır.
+          </p>
+        </div>
+      </div>
       
       <section className="mx-auto max-w-6xl px-6 py-12 sm:py-16">
         <div className="mb-10 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
